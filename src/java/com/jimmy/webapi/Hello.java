@@ -7,12 +7,18 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.sql.*;
+
 @Path("/hello")
 public class Hello {
+    Connection conn = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
     // This method is called if TEXT_PLAIN is request
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String sayPlainTextHello() {
+    public String sayPlainTextHello() throws SQLException {
+
         return "Hello Jersey \n You are using TEXT_PLAIN GET.";
     }
     // This method is called if XML is request
@@ -24,8 +30,35 @@ public class Hello {
     // This method is called if HTML is request
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String sayHtmlHello() {
+    public String sayHtmlHello() throws SQLException {
+
+        try {
+            String url = "jdbc:oracle:thin:@localhost:1521:orcl";
+            String user = "JimmyUser";
+            String password = "jim930527";
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            conn = DriverManager.getConnection(url, user, password);
+            //conn = DriverManager.getConnection("jdbc:oracle:thin:@(description=(address_list=(address=(protocol=TCP)(port=1521)(host=localhost)))(connect_data=(SERVER = DEDICATED)(SERVICE_NAME = db.efriendnet.com)))", "efnx", "efnx");
+            ps = conn.prepareStatement("select oga01 from oga_file where oga01 = 'FS581-1710130001'");
+            rs = ps.executeQuery();
+            while(rs.next())
+            {
+                System.out.println(rs.getString("topic"));
+            }
+        } catch (Exception e) {
+            System.out.print(e.getMessage());
+        }
+        finally
+        {
+            if (rs != null) {try {rs.close();} catch (SQLException e) {}}
+            if (ps != null) {try {ps.close();} catch (SQLException e) {}}
+            if (conn != null) {try {conn.close();} catch (SQLException e) {}}
+        }
+
+
+
+
         return "<html> " + "<title>" + "Hello Jersey" + "</title>"
-                + "<body><h1>" + "Hello Jersey <br> You are using TEXT_HTML GET." + "</body></h1>" + "</html> ";
+                + "<body><h1>" + "Hello Jersey <br> You are using TEXT_HTML GET."  + rs.getString("topic") + "</body></h1>" + "</html> ";
     }
 }
