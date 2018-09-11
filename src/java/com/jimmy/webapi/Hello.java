@@ -11,6 +11,9 @@ import java.sql.*;
 
 @Path("/hello")
 public class Hello {
+    String url = "jdbc:oracle:thin:@localhost:1521:orcl";
+    String user = "JimmyUser";
+    String password = "jim930527";
     Connection conn = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
@@ -33,20 +36,17 @@ public class Hello {
     public String sayHtmlHello() throws SQLException {
 
         try {
-            String url = "jdbc:oracle:thin:@localhost:1521:orcl";
-            String user = "JimmyUser";
-            String password = "jim930527";
             Class.forName("oracle.jdbc.driver.OracleDriver");
             conn = DriverManager.getConnection(url, user, password);
-            //conn = DriverManager.getConnection("jdbc:oracle:thin:@(description=(address_list=(address=(protocol=TCP)(port=1521)(host=localhost)))(connect_data=(SERVER = DEDICATED)(SERVICE_NAME = db.efriendnet.com)))", "efnx", "efnx");
+            //conn = DriverManager.getConnection("jdbc:oracle:thin:@(description=(address_list=(address=(protocol=TCP)(port=1521)(host=localhost)))(connect_data=(SERVER = DEDICATED)(SERVICE_NAME =orcl)))", "JimmyUser", "jim930527");
             ps = conn.prepareStatement("select oga01 from oga_file where oga01 = 'FS581-1710130001'");
             rs = ps.executeQuery();
             while(rs.next())
             {
-                System.out.println(rs.getString("topic"));
+                System.out.println(rs.getString("oga01"));
             }
         } catch (Exception e) {
-            System.out.print(e.getMessage());
+            System.out.print("ERROR: "+e.getMessage());
         }
         finally
         {
@@ -57,8 +57,8 @@ public class Hello {
 
 
 
-
+        //+ rs.getString("topic")
         return "<html> " + "<title>" + "Hello Jersey" + "</title>"
-                + "<body><h1>" + "Hello Jersey <br> You are using TEXT_HTML GET."  + rs.getString("topic") + "</body></h1>" + "</html> ";
+                + "<body><h1>" + "Hello Jersey <br> You are using TEXT_HTML GET." + "</body></h1>" + "</html> ";
     }
 }
