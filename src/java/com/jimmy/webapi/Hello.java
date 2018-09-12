@@ -11,12 +11,7 @@ import java.sql.*;
 
 @Path("/hello")
 public class Hello {
-    String url = "jdbc:oracle:thin:@localhost:1521:orcl";
-    String user = "JimmyUser";
-    String password = "jim930527";
     Connection conn = null;
-    PreparedStatement ps = null;
-    ResultSet rs = null;
     // This method is called if TEXT_PLAIN is request
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -33,17 +28,27 @@ public class Hello {
     // This method is called if HTML is request
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String sayHtmlHello() throws SQLException {
-
+    public String sayHtmlHello(){
+        Connection orclDbConn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-            conn = DriverManager.getConnection(url, user, password);
-            //conn = DriverManager.getConnection("jdbc:oracle:thin:@(description=(address_list=(address=(protocol=TCP)(port=1521)(host=localhost)))(connect_data=(SERVER = DEDICATED)(SERVICE_NAME =orcl)))", "JimmyUser", "jim930527");
-            ps = conn.prepareStatement("select oga01 from oga_file where oga01 = 'FS581-1710130001'");
+            //orclDbConn = new OracleDBConnection().getDBConnection();
+            orclDbConn = new OracleDBConnection("localhost","1521","orcl","JimmyUser","jim930527","oracle.jdbc.driver.OracleDriver").getDBConnection();
+            //conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl", "JimmyUser", "jim930527");
+            //ps = conn.prepareStatement("select oga01 from oga_file where oga01 = 'FS581-1710130001'");
+            ps = orclDbConn.prepareStatement("select oga01 from oga_file where oga01 = 'FS581-1710130001'");
             rs = ps.executeQuery();
             while(rs.next())
             {
-                System.out.println(rs.getString("oga01"));
+                System.out.println(rs.getString("OGA01"));
+                return "<html> " +
+                        "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">"+
+                        "<title>" + "Hello Jersey" + "</title>" +
+                            "<body><h1>" +
+                                "Hello Jersey <br> You are using TEXT_HTML GET.<br> 出貨單號" + rs.getString("OGA01") +
+                            "</body></h1>" +
+                        "</html> ";
             }
         } catch (Exception e) {
             System.out.print("ERROR: "+e.getMessage());
@@ -52,13 +57,15 @@ public class Hello {
         {
             if (rs != null) {try {rs.close();} catch (SQLException e) {}}
             if (ps != null) {try {ps.close();} catch (SQLException e) {}}
-            if (conn != null) {try {conn.close();} catch (SQLException e) {}}
+            //if (conn != null) {try {conn.close();} catch (SQLException e) {}}
+            if (orclDbConn != null) {try {orclDbConn.close();} catch (SQLException e) {}}
         }
 
 
-
-        //+ rs.getString("topic")
         return "<html> " + "<title>" + "Hello Jersey" + "</title>"
-                + "<body><h1>" + "Hello Jersey <br> You are using TEXT_HTML GET." + "</body></h1>" + "</html> ";
+                + "<body><h1>" + "Hello Jersey <br> You are using TEXT_HTML GET. NULL!!!!!!!"  + "</body></h1>" + "</html> ";
+
     }
+
+
 }
